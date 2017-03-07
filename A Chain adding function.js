@@ -1,9 +1,28 @@
-function add(firstNumber) {
-    console.log('first_num: ', firstNumber)
-    return function(secondNumber) {
-        if(add(secondNumber).prototype === Function)
-        return firstNumber + add(secondNumber);
-    }
+function sum(a) {
+
+  var sum = a
+
+  function f(b) {
+    sum += b
+    return f
+  }
+
+  f.toString = function() { return sum }
+
+  return f
 }
 
-console.log(add(2)(5));
+function add(num) {
+    var sum = num;
+
+    function f(b) {
+        sum += b;
+        return f;
+    }
+
+    f.toString = function() { return sum }
+    
+    return f;
+}
+
+alert(add(2)(5));
