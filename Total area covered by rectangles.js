@@ -1,4 +1,4 @@
-function calculate(arrayOfRect) {
+function calculate1(arrayOfRect) {
     // var outterMostLeft = Infinity;
     // var outterMostBottom = Infinity;
     // var outterMostRight = 0;
@@ -43,6 +43,52 @@ function calculate(arrayOfRect) {
     return arrayOfRect.length === 0 ? 0 : occupiedSquares.size;
     //(outterMostRight - outterMostLeft) * (outterMostTop - outterMostBottom) - resultingArea;
 }
+
+function calculate(arrayOfRect) {
+    
+
+    var sortedArrOfRect = arrayOfRect.sort();
+
+    var currentX = sortedArrOfRect[0][0];
+
+    var currentRects = [];
+
+    var resultingSquare = 0;
+
+    while(sortedArrOfRect) {
+        var nextX = (() => {
+            for (arr of sortedArrOfRect) {
+                currentRects.push(arr);
+                if (arr[0] > currentX && arr[0] < currentRects[0][2]) {
+                    sortedArrOfRect.shift();
+                    return currentRects[0][2];
+                } else if (arr[0] > currentX) {
+                    return arr[0];
+                }
+            }
+        })();
+
+        while(currentRects) {
+            var currentY = currentRects[0][1];
+
+            var nextY = (() => {
+                for(arr of currentRects) {
+                    if (arr[1] > currentY && arr[1] < currentRects[0][3]) {
+                        return arr[1];
+                    } else if (arr[1] > currentY) {
+                        currentRects.shift();
+                        return currentRects[0][3];
+                    }
+                }
+            })();
+
+            resultingSquare += (nextX - currentX) * (nextY - currentY);
+        }
+    }
+    
+    return resultingSquare;
+}
+
 
 console.log(calculate([[ 1, 3, 4, 5 ],
   [ 2, 1, 4, 7 ],
