@@ -44,31 +44,58 @@ function calculate1(arrayOfRect) {
     //(outterMostRight - outterMostLeft) * (outterMostTop - outterMostBottom) - resultingArea;
 }
 
+
+function multiDimArraySort(arr1, arr2) {
+    for(i = 0; i < 4; i++){
+        if(arr1[i] < arr2[i]) {
+            return -1;
+        } 
+        if(arr1[i] > arr2[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+function currentRectsYSort(arr1, arr2) {
+    if(arr1[1] < arr2[1]){
+        return -1
+    }
+    if(arr1[1] > arr2[1]){
+        return 1;
+    }
+    return 0;
+}
+
 function calculate(arrayOfRect) {
     
 
-    var sortedArrOfRect = arrayOfRect.sort();
+    var sortedArrOfRect = arrayOfRect.sort(multiDimArraySort);
 
     var currentX = sortedArrOfRect[0][0];
 
-    var currentRects = [];
+    
 
     var resultingSquare = 0;
 
-    while(sortedArrOfRect) {
+    while(sortedArrOfRect.length) {
+        var currentRects = [sortedArrOfRect[0]];
         var nextX = (() => {
-            for (arr of sortedArrOfRect) {
-                currentRects.push(arr);
+            for (arr of sortedArrOfRect.slice(1)) {
                 if (arr[0] > currentX && arr[0] < currentRects[0][2]) {
+                    return arr[0];
+                } else if (arr[0] > currentX) {
                     sortedArrOfRect.shift();
                     return currentRects[0][2];
-                } else if (arr[0] > currentX) {
-                    return arr[0];
                 }
             }
         })();
 
-        while(currentRects) {
+        
+
+        currentRects.sort(currentRectsYSort);
+
+        while(currentRects.length) {
             var currentY = currentRects[0][1];
 
             var nextY = (() => {
@@ -80,19 +107,19 @@ function calculate(arrayOfRect) {
                         return currentRects[0][3];
                     }
                 }
+                var nextY = currentRects[0][3]
+                currentRects.shift();
+                return nextY;
             })();
 
             resultingSquare += (nextX - currentX) * (nextY - currentY);
         }
+        
+        currentX = nextX;
     }
     
     return resultingSquare;
 }
 
 
-console.log(calculate([[ 1, 3, 4, 5 ],
-  [ 2, 1, 4, 7 ],
-  [ 3, 4, 5, 6 ],
-  [ 6, 6, 8, 7 ],
-  [ 5, 3, 8, 4 ],
-  [ 6, 0, 7, 3 ]]));
+console.log(calculate([[3,3,8,5], [6,3,8,9], [11,6,14,12]]));
