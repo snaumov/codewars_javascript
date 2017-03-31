@@ -58,18 +58,14 @@ function multiDimArraySort(arr1, arr2) {
 }
 
 function currentRectsYSort(arr1, arr2) {
-    if(arr1[1] < arr2[1]){
-        return -1
-    }
-    if(arr1[1] > arr2[1]){
-        return 1;
-    }
-    return 0;
+    return arr1[0] - arr2[0] || arr1[3] - arr2[3];
 }
 
 function calculate(arrayOfRect) {
     
-
+    if(arrayOfRect.length === 0) {
+        return 0;
+    }
     var sortedArrOfRect = arrayOfRect.sort(multiDimArraySort);
 
     var currentX = sortedArrOfRect[0][0];
@@ -80,31 +76,55 @@ function calculate(arrayOfRect) {
 
     while(sortedArrOfRect.length) {
         var currentRects = [sortedArrOfRect[0]];
+        if(currentX < currentRects[0][0]){
+            currentX = currentRects[0][0];
+        }
         var nextX = (() => {
             for (arr of sortedArrOfRect.slice(1)) {
+                // if(arr[0] <= currentX) {
+                //     currentRects.push(arr);
+                // }
                 if (arr[0] > currentX && arr[0] < currentRects[0][2]) {
                     return arr[0];
                 } else if (arr[0] > currentX) {
-                    sortedArrOfRect.shift();
+                    //sortedArrOfRect.shift();
                     return currentRects[0][2];
+                } else if(arr[2] > currentX && arr[2] < sortedArrOfRect[0][2]) {
+                    return arr[2];
                 }
             }
+            return currentRects[0][2];
         })();
 
+        for (arr of sortedArrOfRect.slice(1)) {
+            if(arr[0] >= nextX) {
+                break;
+            }
+            currentRects.push(arr);
+        }
         
 
         currentRects.sort(currentRectsYSort);
 
+        var currentY = currentRects[0][1];
+
         while(currentRects.length) {
-            var currentY = currentRects[0][1];
+            if(currentY < currentRects[0][1]){
+                currentY = currentRects[0][1];
+            }
 
             var nextY = (() => {
-                for(arr of currentRects) {
+                for(arr of currentRects.slice(1)) {
                     if (arr[1] > currentY && arr[1] < currentRects[0][3]) {
                         return arr[1];
                     } else if (arr[1] > currentY) {
+                        var nextY = currentRects[0][3];
                         currentRects.shift();
-                        return currentRects[0][3];
+                        return nextY;
+                    } else if (arr[3] > currentY && arr[1] !== currentY) {
+                        var index = currentRects.map(arr => arr.toString()).indexOf(arr.toString());
+                        currentRects.splice(index, 1)
+                        return arr[3];
                     }
                 }
                 var nextY = currentRects[0][3]
@@ -113,13 +133,33 @@ function calculate(arrayOfRect) {
             })();
 
             resultingSquare += (nextX - currentX) * (nextY - currentY);
+
+            currentY = nextY;
         }
         
         currentX = nextX;
+
+        var i = 0;
+        
+        for(arr of sortedArrOfRect) {
+            if(arr[2] > currentX){
+                break;
+            }
+            if(arr[2] <= currentX){
+                sortedArrOfRect.splice(i, 1);
+            }
+            i++;
+        }
+        //sortedArrOfRect = sortedArrOfRect.slice(i);
     }
     
     return resultingSquare;
 }
 
 
-console.log(calculate([[3,3,8,5], [6,3,8,9], [11,6,14,12]]));
+console.log(calculate([[ 1, 3, 4, 5 ],
+  [ 2, 1, 4, 7 ],
+  [ 3, 4, 5, 6 ],
+  [ 6, 6, 8, 7 ],
+  [ 5, 3, 8, 4 ],
+  [ 6, 0, 7, 3 ]]));
