@@ -1,19 +1,29 @@
-function minusToMultiply(expr) {
-    var expr = expr.filter(sym => sym != ' ');
+function sanitizeInput(expr) {
+    var expr = expr.split('').filter(sym => sym != ' ').join('');
     var bracketsStack = [];
-    var positionsStack = [];
+    var output = '';
     for (var i = 0; i < expr.length; i++) {
-        if(expr[i] === '-' && expr[i+1] === '('){
-            positionsStack[i];
-            positionsStack.push('(');
-        }
-        if(expr[i] === ')') {
+        if(expr[i] === '-' && expr[i+1] === '(' && (expr[i-1] === undefined | expr[i-1] === '(' | '-+*/'.indexOf(expr[i-1]) !== -1)){
+            output += '(-1*'
+            bracketsStack.push('{');
+            continue;
+        } else if(expr[i] === '(') {
+            bracketsStack.push(expr[i]);
+            output += '(';
+            continue;
+        } else if(expr[i] === ')'){
             bracketsStack.pop();
+            output += ')';
+            if(bracketsStack[bracketsStack.length - 1] === '{'){
+                bracketsStack.pop();
+                output += ')';
+                continue;
+            }
+            continue;
         }
-        if(!bracketsStack.length & minusIndex) {
-            positionsStack.push([minusIndex, i]);
-        }
+        output += expr[i];
     }
+    return output;
 }
 
 function infixToPostfix(expr) {
@@ -21,11 +31,10 @@ function infixToPostfix(expr) {
     var output = [];
     var currentOperand = '';
     var extraBrackets = [];
+    var expr = sanitizeInput(expr);
     for(var i = 0; i < expr.length; i++) {
-        if(expr[i] === ' '){
-            continue;
-        }
-        if(!isNaN(expr[i]) | expr[i] === '.' | (('+-/*'.indexOf(opstack[opstack.length - 1]) !== -1 | !opstack.length | opstack[opstack.length - 1] === '(' ) & !currentOperand & expr[i] === '-') ){
+        
+        if(!isNaN(expr[i]) | expr[i] === '.' | (('+-/*'.indexOf(opstack[opstack.length - 1]) !== -1 | opstack[opstack.length - 1] === '(' | i === 0 ) & !currentOperand & expr[i] === '-' & !isNaN(expr[i+1])) ){   //| !opstack.length
             currentOperand += expr[i];
             if(i === expr.length - 1){
                 output.push(currentOperand);
@@ -33,15 +42,6 @@ function infixToPostfix(expr) {
             }
             continue;
         } 
-
-        //special case for -(..)
-        if(expr[i] === '(' & currentOperand === '-') {
-            extraBrackets.push('(');
-            opstack.push('(');
-            opstack.push('*');
-            output.push('-1');
-            currentOperand = '';
-        }
         
         if(currentOperand) {
             output.push(currentOperand);
@@ -117,18 +117,24 @@ const calc = function(expr) {
     return stack[0];
 }
 
-console.log(calc('12* 123/-(-5 + 2))'));
+console.log(infixToPostfix('2 / (2 + 3) - -6'));
 
-console.log(calc('12* 123/(-5 + 2)'))
+console.log(calc('((2.33 / (2.9+3.5)*4) - -6)'));
 
-console.log(calc('-123'))
+console.log(calc('(2 + 4) - -6'));
 
-console.log(calc('-1 -1'));
+console.log(calc('12* 123/-(-5 + 2)') === 492);
 
-console.log(calc('2 / (2 + 3) * 4.33 - -6'))
+console.log(calc('12* 123/(-5 + 2)') === -492)
 
-console.log(calc('2 /2+3 * 4.75- -6'));
+console.log(calc('-123') === -123)
 
-console.log(calc('(1 +2) * (3+4)'));
+console.log(calc('-1 -1') === -2);
 
-console.log(calc('(1+2)*3 - (4 - 5) * (6 + 7)'))
+console.log(calc('2 / (2 + 3) * 4.33 - -6') === 7.732)
+
+console.log(calc('2 /2+3 * 4.75- -6') === 21.25);
+
+console.log(calc('(1 +2) * (3+4)') === 21);
+
+console.log(calc('(1+2)*3 - (4 - 5) * (6 + 7)') === 22)
