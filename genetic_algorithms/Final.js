@@ -19,9 +19,14 @@ GeneticAlgorithm.prototype.select = function(population, fitnesses) {
 
   var randomNum = Math.random();
 
+  const startIndOfRullete = getRandomIntInclusive(0, population.length - 1);
+
   var sum = 0
-  var i = 0;
+  var i = startIndOfRullete;
   while(sum < randomNum) {
+      if (i === population.length - 1) {
+          i = 0;
+      }
       sum += fitnesses[i];
       i++;
   }
@@ -71,7 +76,7 @@ GeneticAlgorithm.prototype.run = function(fitness, length, p_c, p_m, iterations)
 
   var iteration = 0;
 
-  while(iteration < 1000) {
+  while(iteration < 100) {
 
     var newPopulation = [];
     var newFitnesses = [];
